@@ -1,0 +1,203 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    My Applications
+{% endblock %}
+
+{% block main %}
+    <h1 class="mb-4">My Applications</h1>
+    <!-- Status filter -->
+    <form
+        action="{{ url_for('applications') }}"
+        method="get"
+        class="mb-4"
+    >
+        <label for="filter-status" class="form-label">
+            Filter by status
+        </label>
+
+        <div class="d-flex gap-2">
+            <select
+                id="filter-status"
+                name="status"
+                class="form-select"
+                style="max-width: 250px;"
+            >
+                <option
+                    value="All"
+                    {% if selected_status == "All" %}selected{% endif %}
+                >
+                    All
+                </option>
+
+                <option
+                    value="Saved"
+                    {% if selected_status == "Saved" %}selected{% endif %}
+                >
+                    Saved
+                </option>
+
+                <option
+                    value="Applied"
+                    {% if selected_status == "Applied" %}selected{% endif %}
+                >
+                    Applied
+                </option>
+
+                <option
+                    value="Online Assessment"
+                    {% if selected_status == "Online Assessment" %}selected{% endif %}
+                >
+                    Online Assessment
+                </option>
+
+                <option
+                    value="Interview"
+                    {% if selected_status == "Interview" %}selected{% endif %}
+                >
+                    Interview
+                </option>
+
+                <option
+                    value="Rejected"
+                    {% if selected_status == "Rejected" %}selected{% endif %}
+                >
+                    Rejected
+                </option>
+
+                <option
+                    value="Offer"
+                    {% if selected_status == "Offer" %}selected{% endif %}
+                >
+                    Offer
+                </option>
+            </select>
+
+            <button type="submit" class="btn btn-primary">
+                Filter
+            </button>
+        </div>
+    </form>
+
+    {% if applications %}
+        {% for application in applications %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        {{ application["title"] }}
+                    </h3>
+
+                    <p class="mb-1">
+                        <strong>{{ application["company"] }}</strong>
+                    </p>
+
+                    <p>
+                        {{ application["location"] }}
+                    </p>
+
+                    <p>
+                        <strong>Status:</strong>
+                        {{ application["status"] }}
+                    </p>
+
+                    <p>
+                        <strong>Saved:</strong>
+                        {{ application["saved_at"] }}
+                    </p>
+
+                    <!-- Update status form -->
+                    <form
+                        action="{{ url_for('update_status') }}"
+                        method="post"
+                        class="d-flex gap-2 mb-3"
+                    >
+                        <input
+                            type="hidden"
+                            name="application_id"
+                            value="{{ application['id'] }}"
+                        >
+
+                        <select name="status" class="form-select">
+                            <option
+                                value="Saved"
+                                {% if application["status"] == "Saved" %}selected{% endif %}
+                            >
+                                Saved
+                            </option>
+
+                            <option
+                                value="Applied"
+                                {% if application["status"] == "Applied" %}selected{% endif %}
+                            >
+                                Applied
+                            </option>
+
+                            <option
+                                value="Online Assessment"
+                                {% if application["status"] == "Online Assessment" %}selected{% endif %}
+                            >
+                                Online Assessment
+                            </option>
+
+                            <option
+                                value="Interview"
+                                {% if application["status"] == "Interview" %}selected{% endif %}
+                            >
+                                Interview
+                            </option>
+
+                            <option
+                                value="Rejected"
+                                {% if application["status"] == "Rejected" %}selected{% endif %}
+                            >
+                                Rejected
+                            </option>
+
+                            <option
+                                value="Offer"
+                                {% if application["status"] == "Offer" %}selected{% endif %}
+                            >
+                                Offer
+                            </option>
+                        </select>
+
+                        <button type="submit" class="btn btn-secondary">
+                            Update
+                        </button>
+                    </form>
+
+                    <div class="d-flex gap-2">
+                        {% if application["apply_url"] %}
+                            <a
+                                href="{{ application['apply_url'] }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="btn btn-primary"
+                            >
+                                View Posting
+                            </a>
+                        {% endif %}
+
+                        <!-- Delete form -->
+                        <form
+                            action="{{ url_for('delete_application') }}"
+                            method="post"
+                        >
+                            <input
+                                type="hidden"
+                                name="application_id"
+                                value="{{ application['id'] }}"
+                            >
+
+                            <button type="submit" class="btn btn-danger">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No applications found for this status.</p>
+    {% endif %}
+{% endblock %}

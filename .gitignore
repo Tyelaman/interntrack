@@ -1,0 +1,8 @@
+.env
+.venv/
+.vscode/
+__pycache__/
+*.pyc
+session_files/
+flask_session/
+interntrack.db

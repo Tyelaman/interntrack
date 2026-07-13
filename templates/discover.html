@@ -1,0 +1,100 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Discover
+{% endblock %}
+
+{% block main %}
+    <h1 class="mb-4">Discover Internships</h1>
+
+    <form
+        action="{{ url_for('discover') }}"
+        method="post"
+        class="mb-4"
+    >
+        <div class="mb-3">
+            <label class="form-label" for="keyword">
+                Keyword
+            </label>
+
+            <input
+                autocomplete="off"
+                class="form-control"
+                id="keyword"
+                name="keyword"
+                placeholder="For example: software engineer intern"
+                required
+                type="text"
+                value="{{ keyword }}"
+            >
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="location">
+                Location (optional)
+            </label>
+
+            <input
+                autocomplete="off"
+                class="form-control"
+                id="location"
+                name="location"
+                placeholder="For example: Boston, MA"
+                type="text"
+                value="{{ location }}"
+            >
+        </div>
+
+        <button class="btn btn-primary" type="submit">
+            Search
+        </button>
+    </form>
+
+    {% if searched %}
+        <p>{{ jobs | length }} jobs found</p>
+
+        {% if jobs %}
+            {% for job in jobs %}
+                <form action="{{ url_for('save') }}" method="post">
+                    <input type="hidden" name="external_id" value="{{ job['external_id'] }}">
+                    <input type="hidden" name="title" value="{{ job['title'] }}">
+                    <input type="hidden" name="company" value="{{ job['company'] }}">
+                    <input type="hidden" name="location" value="{{ job['location'] }}">
+                    <input type="hidden" name="description" value="{{ job['description'] }}">
+                    <input type="hidden" name="apply_url" value="{{ job['apply_url'] }}">
+                    <input type="hidden" name="posted_at" value="{{ job['posted_at'] }}">
+
+                    <button type="submit" class="btn btn-success">
+                        Save to Tracker
+                    </button>
+                </form>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h2 class="card-title">
+                            {{ job["title"] }}
+                        </h2>
+
+                        <h3 class="card-subtitle mb-2 text-muted">
+                            {{ job["company"] }}
+                        </h3>
+
+                        <p>{{ job["location"] }}</p>
+                        <p>{{ job["description"] }}</p>
+                        <p>Posted: {{ job["posted_at"] }}</p>
+
+                        <a
+                            class="btn btn-primary"
+                            href="{{ job['apply_url'] }}"
+                            rel="noopener noreferrer"
+                            target="_blank"
+                        >
+                            View Posting
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No internships were found.</p>
+        {% endif %}
+    {% endif %}
+{% endblock %}

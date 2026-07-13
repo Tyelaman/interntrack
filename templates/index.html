@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Dashboard
+{% endblock %}
+
+{% block main %}
+    <h1 class="mb-4">Dashboard</h1>
+
+    <!-- Application summary cards -->
+    <div class="row">
+        <div class="col-md mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Applications</h5>
+                    <p class="display-5 mb-0">{{ total }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Applied</h5>
+                    <p class="display-5 mb-0">{{ applied }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Interviewing</h5>
+                    <p class="display-5 mb-0">{{ interviewing }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Rejected</h5>
+                    <p class="display-5 mb-0">{{ rejected }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Offers</h5>
+                    <p class="display-5 mb-0">{{ offers }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recently saved applications -->
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h2 class="mb-0">Recently Saved</h2>
+
+        <a
+            href="{{ url_for('applications') }}"
+            class="btn btn-outline-primary"
+        >
+            View All Applications
+        </a>
+    </div>
+
+    {% if recent_applications %}
+        {% for application in recent_applications %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title">
+                                {{ application["title"] }}
+                            </h5>
+
+                            <p class="mb-1">
+                                <strong>{{ application["company"] }}</strong>
+                            </p>
+                        </div>
+
+                        <span class="badge bg-secondary">
+                            {{ application["status"] }}
+                        </span>
+                    </div>
+
+                    <p class="text-muted mb-3">
+                        Saved: {{ application["saved_at"] }}
+                    </p>
+
+                    {% if application["apply_url"] %}
+                        <a
+                            href="{{ application['apply_url'] }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-primary"
+                        >
+                            View Posting
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center">
+                <p class="mb-3">
+                    You have not saved any internships yet.
+                </p>
+
+                <a
+                    href="{{ url_for('discover') }}"
+                    class="btn btn-primary"
+                >
+                    Discover Internships
+                </a>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
