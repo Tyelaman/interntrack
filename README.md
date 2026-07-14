@@ -1,5 +1,6 @@
 # InternTrack
 
+## Video URL: https://youtu.be/M6wjNmQahzQ
 ## Description
 
 InternTrack is a Flask web application that helps users discover internships and organize the positions they are considering or applying to. The project combines internship search with a personal application tracker so that users do not need to search on one website and manage their progress somewhere else.
@@ -164,7 +165,7 @@ The combination of `user_id`, `source`, and `external_id` is unique. This preven
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/interntrack.git
+git clone https://github.com/Tyelaman/interntrack.git
 cd interntrack
 ```
 
