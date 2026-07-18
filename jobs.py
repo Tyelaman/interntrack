@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def search_jobs(keyword, location):
+def search_jobs(keyword, location, page_number=1):
     # Read credentials from .env
     app_id = os.getenv("ADZUNA_APP_ID")
     app_key = os.getenv("ADZUNA_APP_KEY")
@@ -18,7 +18,6 @@ def search_jobs(keyword, location):
 
     # Build the Adzuna endpoint URL
     country_code = "us"
-    page_number = 1
     url = f"https://api.adzuna.com/v1/api/jobs/{country_code}/search/{page_number}"
 
     # Build query parameters
@@ -62,6 +61,7 @@ def search_jobs(keyword, location):
             "posted_at": raw_job.get("created", "Date not available")
         }
         normalized_jobs.append(normalized_job)
+        total_results = data.get("count", 0)
 
     # Return results
-    return normalized_jobs
+    return normalized_jobs, total_results

@@ -2,6 +2,7 @@ from cs50 import SQL
 from jobs import search_jobs
 from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
+import math
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from helpers import apology, login_required
@@ -172,34 +173,43 @@ def applications():
         )
     return render_template("applications.html", applications=saved_jobs, selected_status=selected_status)
 
-@app.route("/discover", methods=["GET", "POST"])
+@app.route("/discover")
 @login_required
 def discover():
     jobs = []
-    keyword = ""
-    location = ""
-    searched = False
 
-    if request.method == "POST":
-        searched = True
+    keyword = request.args.get("keyword", "").strip()
+    location = request.args.get("location", "").strip()
+    page = request.args.get("page", 1, type=int)
 
-        keyword = request.form.get("keyword", "").strip()
-        location = request.form.get("location", "").strip()
+    if page < 1:
+        page = 1
 
-        if not keyword:
-            return apology("must provide a keyword", 400)
+    results_per_page = 10
+    total_results = 0
+    total_pages = 0
+    searched = bool(keyword)
 
-        # Temporary test before connecting Adzuna
-        print("Keyword:", keyword)
-        print("Location:", location or "No location provided")
-        jobs = search_jobs(keyword, location)
+    if searched:
+        jobs, total_results = search_jobs(
+            keyword,
+            location,
+            page
+        )
+
+        total_pages = math.ceil(
+            total_results / results_per_page
+        )
 
     return render_template(
         "discover.html",
         jobs=jobs,
         keyword=keyword,
         location=location,
-        searched=searched
+        searched=searched,
+        page=page,
+        total_pages=total_pages,
+        total_results=total_results
     )
 @app.route("/")
 @login_required
