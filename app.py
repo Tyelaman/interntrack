@@ -1,5 +1,5 @@
 from cs50 import SQL
-from jobs import search_jobs
+from jobs import JobSearchError, search_jobs
 from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
 import math
@@ -188,18 +188,23 @@ def discover():
     results_per_page = 10
     total_results = 0
     total_pages = 0
+    error_message = None
     searched = bool(keyword)
 
     if searched:
-        jobs, total_results = search_jobs(
-            keyword,
-            location,
-            page
-        )
+        try:
+            jobs, total_results = search_jobs(
+                keyword,
+                location,
+                page
+            )
 
-        total_pages = math.ceil(
-            total_results / results_per_page
-        )
+            total_pages = math.ceil(
+                total_results / results_per_page
+            )
+
+        except JobSearchError as error:
+            error_message = str(error)
 
     return render_template(
         "discover.html",
@@ -209,7 +214,8 @@ def discover():
         searched=searched,
         page=page,
         total_pages=total_pages,
-        total_results=total_results
+        total_results=total_results,
+        error_message=error_message
     )
 @app.route("/")
 @login_required

@@ -51,8 +51,12 @@
             Search
         </button>
     </form>
-
-    {% if searched %}
+    {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+    {% endif %}
+    {% if searched and not error_message %}
         {% if jobs %}
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <p class="mb-0">

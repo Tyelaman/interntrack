@@ -3,6 +3,8 @@ import os
 import requests
 from dotenv import load_dotenv
 
+class JobSearchError(Exception):
+    """Raised when the job search service cannot complete a request."""
 
 load_dotenv()
 
@@ -30,13 +32,51 @@ def search_jobs(keyword, location, page_number=1):
     # Add location only when provided
     if location:
         params["where"] = location
-    # Send GET request with a timeout
-    response = requests.get(url, params=params, timeout=10)
-    # Check HTTP status
-    response.raise_for_status()
+
+    # Send GET request with a timeout and check HTTP status
+    try:
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+    except requests.Timeout as error:
+        raise JobSearchError(
+            "The internship search took too long. Please try again."
+        ) from error
+    except requests.ConnectionError as error:
+        raise JobSearchError(
+            "Could not connect to the internship search service."
+        ) from error
+    except requests.HTTPError as error:
+        status_code = (
+            error.response.status_code
+            if error.response is not None
+            else None
+        )
+
+        if status_code == 429:
+            message = "Too many searches were made. Please wait and try again."
+        elif status_code in [500, 502, 503, 504]:
+            message = (
+                "The internship search service is temporarily unavailable. "
+                "Please try again shortly."
+            )
+        else:
+            message = "The internship search service returned an error."
+
+        raise JobSearchError(message) from error
+    except requests.RequestException as error:
+        raise JobSearchError(
+            "Something went wrong while searching for internships."
+        ) from error
 
     # Convert response to JSON
-    data = response.json()
+    try:
+        data = response.json()
+    except requests.exceptions.JSONDecodeError as error:
+        raise JobSearchError(
+            "The internship search service returned an invalid response."
+        ) from error
+    total_results = data.get("count", 0)
+
     # Normalizing the results to ensure consistent structure
     normalized_jobs = []
     for raw_job in data.get("results", []):
@@ -57,11 +97,10 @@ def search_jobs(keyword, location, page_number=1):
             ),
 
             "description": raw_job.get("description", "No description provided"),
-            "apply_url": raw_job.get("redirect_url", "None  "),
+            "apply_url": raw_job.get("redirect_url", "None"),
             "posted_at": raw_job.get("created", "Date not available")
         }
         normalized_jobs.append(normalized_job)
-        total_results = data.get("count", 0)
 
     # Return results
     return normalized_jobs, total_results
