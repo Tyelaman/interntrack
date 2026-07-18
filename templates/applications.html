@@ -5,7 +5,26 @@
 {% endblock %}
 
 {% block main %}
-    <h1 class="mb-4">My Applications</h1>
+    {% set badge_classes = {
+        "Saved": "bg-secondary",
+        "Applied": "bg-primary",
+        "Online Assessment": "bg-info text-dark",
+        "Interview": "bg-warning text-dark",
+        "Rejected": "bg-danger",
+        "Offer": "bg-success"
+    } %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">My Applications</h1>
+
+        <a
+            href="{{ url_for('discover') }}"
+            class="btn btn-outline-primary"
+        >
+            Discover Internships
+        </a>
+    </div>
+
     <!-- Status filter -->
     <form
         action="{{ url_for('applications') }}"
@@ -16,7 +35,7 @@
             Filter by status
         </label>
 
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap gap-2">
             <select
                 id="filter-status"
                 name="status"
@@ -76,40 +95,62 @@
             <button type="submit" class="btn btn-primary">
                 Filter
             </button>
+
+            {% if selected_status != "All" %}
+                <a
+                    href="{{ url_for('applications') }}"
+                    class="btn btn-outline-secondary"
+                >
+                    Clear Filter
+                </a>
+            {% endif %}
         </div>
     </form>
 
     {% if applications %}
         {% for application in applications %}
-            <div class="card mb-3">
+            <div class="card mb-3 shadow-sm">
                 <div class="card-body">
-                    <h3 class="card-title">
-                        {{ application["title"] }}
-                    </h3>
+                    <div
+                        class="d-flex flex-wrap justify-content-between
+                               align-items-start gap-2 mb-2"
+                    >
+                        <div>
+                            <h3 class="card-title mb-1">
+                                {{ application["title"] }}
+                            </h3>
 
-                    <p class="mb-1">
-                        <strong>{{ application["company"] }}</strong>
+                            <p class="mb-0">
+                                <strong>{{ application["company"] }}</strong>
+                            </p>
+                        </div>
+
+                        <span
+                            class="badge {{
+                                badge_classes.get(
+                                    application['status'],
+                                    'bg-secondary'
+                                )
+                            }}"
+                        >
+                            {{ application["status"] }}
+                        </span>
+                    </div>
+
+                    <p class="mb-2">
+                        {{ application["location"] or "Location unavailable" }}
                     </p>
 
-                    <p>
-                        {{ application["location"] }}
-                    </p>
-
-                    <p>
-                        <strong>Status:</strong>
-                        {{ application["status"] }}
-                    </p>
-
-                    <p>
+                    <p class="text-muted">
                         <strong>Saved:</strong>
-                        {{ application["saved_at"] }}
+                        {{ application["saved_at"] | format_date }}
                     </p>
 
                     <!-- Update status form -->
                     <form
                         action="{{ url_for('update_status') }}"
                         method="post"
-                        class="d-flex gap-2 mb-3"
+                        class="d-flex flex-wrap gap-2 mb-3"
                     >
                         <input
                             type="hidden"
@@ -117,56 +158,87 @@
                             value="{{ application['id'] }}"
                         >
 
-                        <select name="status" class="form-select">
+                        <!-- Keeps the current filter after updating -->
+                        <input
+                            type="hidden"
+                            name="return_status"
+                            value="{{ selected_status }}"
+                        >
+
+                        <label
+                            for="status-{{ application['id'] }}"
+                            class="visually-hidden"
+                        >
+                            Application status
+                        </label>
+
+                        <select
+                            id="status-{{ application['id'] }}"
+                            name="status"
+                            class="form-select"
+                            style="max-width: 250px;"
+                        >
                             <option
                                 value="Saved"
-                                {% if application["status"] == "Saved" %}selected{% endif %}
+                                {% if application["status"] == "Saved" %}
+                                    selected
+                                {% endif %}
                             >
                                 Saved
                             </option>
 
                             <option
                                 value="Applied"
-                                {% if application["status"] == "Applied" %}selected{% endif %}
+                                {% if application["status"] == "Applied" %}
+                                    selected
+                                {% endif %}
                             >
                                 Applied
                             </option>
 
                             <option
                                 value="Online Assessment"
-                                {% if application["status"] == "Online Assessment" %}selected{% endif %}
+                                {% if application["status"] == "Online Assessment" %}
+                                    selected
+                                {% endif %}
                             >
                                 Online Assessment
                             </option>
 
                             <option
                                 value="Interview"
-                                {% if application["status"] == "Interview" %}selected{% endif %}
+                                {% if application["status"] == "Interview" %}
+                                    selected
+                                {% endif %}
                             >
                                 Interview
                             </option>
 
                             <option
                                 value="Rejected"
-                                {% if application["status"] == "Rejected" %}selected{% endif %}
+                                {% if application["status"] == "Rejected" %}
+                                    selected
+                                {% endif %}
                             >
                                 Rejected
                             </option>
 
                             <option
                                 value="Offer"
-                                {% if application["status"] == "Offer" %}selected{% endif %}
+                                {% if application["status"] == "Offer" %}
+                                    selected
+                                {% endif %}
                             >
                                 Offer
                             </option>
                         </select>
 
                         <button type="submit" class="btn btn-secondary">
-                            Update
+                            Update Status
                         </button>
                     </form>
 
-                    <div class="d-flex gap-2">
+                    <div class="d-flex flex-wrap gap-2">
                         {% if application["apply_url"] %}
                             <a
                                 href="{{ application['apply_url'] }}"
@@ -178,7 +250,7 @@
                             </a>
                         {% endif %}
 
-                        <!-- Delete form -->
+                        <!-- Delete application form -->
                         <form
                             action="{{ url_for('delete_application') }}"
                             method="post"
@@ -189,7 +261,23 @@
                                 value="{{ application['id'] }}"
                             >
 
-                            <button type="submit" class="btn btn-danger">
+                            <!-- Keeps the current filter after deleting -->
+                            <input
+                                type="hidden"
+                                name="return_status"
+                                value="{{ selected_status }}"
+                            >
+
+                            <button
+                                type="submit"
+                                class="btn btn-danger"
+                                onclick="
+                                    return confirm(
+                                        'Delete this application? ' +
+                                        'This cannot be undone.'
+                                    );
+                                "
+                            >
                                 Delete
                             </button>
                         </form>
@@ -198,6 +286,13 @@
             </div>
         {% endfor %}
     {% else %}
-        <p>No applications found for this status.</p>
+        <div class="alert alert-info">
+            {% if selected_status == "All" %}
+                You have not saved any internships yet.
+            {% else %}
+                No applications were found with the
+                <strong>{{ selected_status }}</strong> status.
+            {% endif %}
+        </div>
     {% endif %}
 {% endblock %}
