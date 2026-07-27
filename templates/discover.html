@@ -5,104 +5,168 @@
 {% endblock %}
 
 {% block main %}
-    <h1 class="mb-4">Discover Internships</h1>
+    <header class="discover-header">
+        <p class="page-eyebrow">
+            Internship Search
+        </p>
 
-    <!-- Internship search form -->
-    <form
-        action="{{ url_for('discover') }}"
-        method="get"
-        class="mb-4"
-    >
-        <div class="mb-3">
-            <label class="form-label" for="keyword">
-                Keyword
-            </label>
+        <h1 class="page-title">
+            Discover Internships
+        </h1>
 
-            <input
-                autocomplete="off"
-                autofocus
-                class="form-control"
-                id="keyword"
-                name="keyword"
-                placeholder="For example: software engineer intern"
-                required
-                type="text"
-                value="{{ keyword }}"
-            >
-        </div>
+        <p class="page-subtitle">
+            Search current internship postings and save opportunities
+            directly to your application tracker.
+        </p>
+    </header>
 
-        <div class="mb-3">
-            <label class="form-label" for="location">
-                Location (optional)
-            </label>
+    <!-- Search form -->
+    <section class="search-panel">
+        <form
+            action="{{ url_for('discover') }}"
+            method="get"
+        >
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-6">
+                    <label
+                        class="form-label"
+                        for="keyword"
+                    >
+                        Keyword
+                    </label>
 
-            <input
-                autocomplete="off"
-                class="form-control"
-                id="location"
-                name="location"
-                placeholder="For example: Boston, MA"
-                type="text"
-                value="{{ location }}"
-            >
-        </div>
+                    <input
+                        autocomplete="off"
+                        autofocus
+                        class="form-control"
+                        id="keyword"
+                        name="keyword"
+                        placeholder="Software engineer intern"
+                        required
+                        type="text"
+                        value="{{ keyword }}"
+                    >
+                </div>
 
-        <button class="btn btn-primary" type="submit">
-            Search
-        </button>
-    </form>
+                <div class="col-lg-4">
+                    <label
+                        class="form-label"
+                        for="location"
+                    >
+                        Location
+                    </label>
+
+                    <input
+                        autocomplete="off"
+                        class="form-control"
+                        id="location"
+                        name="location"
+                        placeholder="Boston, MA or Remote"
+                        type="text"
+                        value="{{ location }}"
+                    >
+                </div>
+
+                <div class="col-lg-2">
+                    <button
+                        class="btn btn-primary w-100"
+                        type="submit"
+                    >
+                        Search Jobs
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
+
     {% if error_message %}
         <div class="alert alert-danger" role="alert">
+            <strong>Search unavailable.</strong>
             {{ error_message }}
         </div>
     {% endif %}
+
     {% if searched and not error_message %}
         {% if jobs %}
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <p class="mb-0">
-                    Showing {{ jobs | length }} results
-                    {% if total_results %}
-                        out of {{ total_results }}
-                    {% endif %}
-                </p>
+            <div class="discover-results-header">
+                <div>
+                    <h2 class="h5 mb-1">
+                        Search Results
+                    </h2>
+
+                    <p class="mb-0">
+                        Showing {{ jobs | length }} results
+                        {% if total_results %}
+                            out of {{ total_results }}
+                        {% endif %}
+                    </p>
+                </div>
 
                 {% if total_pages > 0 %}
-                    <p class="text-muted mb-0">
+                    <span class="badge bg-light text-dark border">
                         Page {{ page }} of {{ total_pages }}
-                    </p>
+                    </span>
                 {% endif %}
             </div>
 
             <!-- Search results -->
             {% for job in jobs %}
-                <div class="card mb-3">
+                <article class="card job-card">
                     <div class="card-body">
-                        <h2 class="card-title">
-                            {{ job["title"] }}
-                        </h2>
+                        <div
+                            class="d-flex flex-wrap
+                                   justify-content-between
+                                   align-items-start gap-3 mb-3"
+                        >
+                            <div>
+                                <p class="application-company">
+                                    {{ job["company"] }}
+                                </p>
 
-                        <h3 class="card-subtitle mb-2 text-muted">
-                            {{ job["company"] }}
-                        </h3>
+                                <h2 class="card-title">
+                                    {{ job["title"] }}
+                                </h2>
+                            </div>
 
-                        <p class="mb-2">
-                            <strong>Location:</strong>
-                            {{ job["location"] }}
-                        </p>
+                            <span class="badge bg-light text-dark border">
+                                Internship
+                            </span>
+                        </div>
 
-                        <p>
-                            {{ job["description"] }}
-                        </p>
+                        <div class="job-meta">
+                            <span>
+                                <strong>Location:</strong>
+                                {{
+                                    job["location"]
+                                    or "Not specified"
+                                }}
+                            </span>
 
-                        <p class="text-muted">
-                            <strong>Posted:</strong>
-                            {{ job["posted_at"] | format_date }}
-                        </p>
+                            <span>
+                                <strong>Posted:</strong>
 
-                        <div class="d-flex flex-wrap gap-2">
+                                {% if job["posted_at"] %}
+                                    {{ job["posted_at"] | format_date }}
+                                {% else %}
+                                    Unknown
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        {% if job["description"] %}
+                            <p class="job-card-description">
+                                {{ job["description"] }}
+                            </p>
+                        {% else %}
+                            <p class="text-muted">
+                                No description was provided.
+                            </p>
+                        {% endif %}
+
+                        <div class="job-actions">
                             {% if job["apply_url"] %}
                                 <a
-                                    class="btn btn-primary"
+                                    class="btn btn-outline-primary"
                                     href="{{ job['apply_url'] }}"
                                     rel="noopener noreferrer"
                                     target="_blank"
@@ -111,7 +175,6 @@
                                 </a>
                             {% endif %}
 
-                            <!-- Save job form -->
                             <form
                                 action="{{ url_for('save') }}"
                                 method="post"
@@ -160,14 +223,14 @@
 
                                 <button
                                     type="submit"
-                                    class="btn btn-success"
+                                    class="btn btn-primary"
                                 >
                                     Save to Tracker
                                 </button>
                             </form>
                         </div>
                     </div>
-                </div>
+                </article>
             {% endfor %}
 
             <!-- Pagination -->
@@ -177,7 +240,6 @@
                     class="mt-4"
                 >
                     <ul class="pagination justify-content-center">
-                        <!-- Previous page -->
                         <li
                             class="page-item
                             {% if page <= 1 %}disabled{% endif %}"
@@ -201,14 +263,12 @@
                             {% endif %}
                         </li>
 
-                        <!-- Current page -->
                         <li class="page-item disabled">
                             <span class="page-link">
                                 Page {{ page }} of {{ total_pages }}
                             </span>
                         </li>
 
-                        <!-- Next page -->
                         <li
                             class="page-item
                             {% if page >= total_pages %}disabled{% endif %}"
@@ -235,9 +295,24 @@
                 </nav>
             {% endif %}
         {% else %}
-            <div class="alert alert-info">
-                No internships were found. Try changing the keyword or
-                location.
+            <div class="empty-state">
+                <h2>No internships found</h2>
+
+                <p>
+                    Try using a broader job title or removing the
+                    location from your search.
+                </p>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if not error_message %}
+            <div class="empty-state">
+                <h2>Start your internship search</h2>
+
+                <p>
+                    Enter a keyword and optional location to discover
+                    opportunities you can save to InternTrack.
+                </p>
             </div>
         {% endif %}
     {% endif %}

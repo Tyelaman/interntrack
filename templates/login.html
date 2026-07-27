@@ -5,34 +5,82 @@
 {% endblock %}
 
 {% block main %}
-    <form
-        action="{{ url_for('login') }}"
-        method="post"
-        class="mx-auto text-center"
-        style="max-width: 300px;"
-    >
-        <div class="mb-3">
-            <input
-                autocomplete="off"
-                autofocus
-                class="form-control"
-                name="username"
-                placeholder="Username"
-                type="text"
-            >
-        </div>
+    <div class="auth-wrapper">
+        <section class="auth-card">
+            <p class="page-eyebrow">
+                Welcome Back
+            </p>
 
-        <div class="mb-3">
-            <input
-                class="form-control"
-                name="password"
-                placeholder="Password"
-                type="password"
-            >
-        </div>
+            <h1>
+                Log In
+            </h1>
 
-        <button class="btn btn-primary w-100" type="submit">
-            Log In
-        </button>
-    </form>
+            <p class="auth-card-subtitle">
+                Access your saved internships and continue tracking
+                your applications.
+            </p>
+
+            <form
+                action="{{ url_for('login') }}"
+                method="post"
+            >
+                <div class="mb-3">
+                    <label
+                        for="username"
+                        class="form-label"
+                    >
+                        Username
+                    </label>
+
+                    <input
+                        autocomplete="username"
+                        autofocus
+                        class="form-control"
+                        id="username"
+                        name="username"
+                        placeholder="Enter your username"
+                        required
+                        type="text"
+                    >
+                </div>
+
+                <div class="mb-4">
+                    <label
+                        for="password"
+                        class="form-label"
+                    >
+                        Password
+                    </label>
+
+                    <input
+                        autocomplete="current-password"
+                        class="form-control"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        required
+                        type="password"
+                    >
+                </div>
+
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                >
+                    Log In
+                </button>
+            </form>
+
+            <p class="text-center mt-4 mb-0">
+                Don’t have an account?
+
+                <a
+                    href="{{ url_for('register') }}"
+                    class="fw-semibold"
+                >
+                    Create one
+                </a>
+            </p>
+        </section>
+    </div>
 {% endblock %}

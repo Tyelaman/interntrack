@@ -112,6 +112,64 @@ def update_status():
         url_for("applications", status=return_status)
     )
 
+@app.route("/update-details", methods=["POST"])
+@login_required
+def update_details():
+    """Update sponsorship information and personal notes."""
+
+    application_id = request.form.get("application_id")
+    sponsorship = request.form.get("sponsorship")
+    notes = request.form.get("notes", "").strip()
+    return_status = request.form.get("return_status", "All")
+
+    allowed_sponsorship_values = [
+        "Yes",
+        "No",
+        "Unknown",
+    ]
+
+    allowed_status_filters = [
+        "All",
+        "Saved",
+        "Applied",
+        "Online Assessment",
+        "Interview",
+        "Rejected",
+        "Offer",
+    ]
+
+    if not application_id:
+        return apology("missing application ID", 400)
+
+    if sponsorship not in allowed_sponsorship_values:
+        return apology("invalid sponsorship value", 400)
+
+    if len(notes) > 1000:
+        return apology(
+            "notes must be 1000 characters or fewer",
+            400,
+        )
+
+    if return_status not in allowed_status_filters:
+        return_status = "All"
+
+    db.execute(
+        """
+        UPDATE applications
+        SET sponsorship = ?, notes = ?
+        WHERE id = ? AND user_id = ?
+        """,
+        sponsorship,
+        notes,
+        application_id,
+        session["user_id"],
+    )
+
+    flash("Application details updated.", "success")
+
+    return redirect(
+        url_for("applications", status=return_status)
+    )
 
 @app.route("/delete-application", methods=["POST"])
 @login_required

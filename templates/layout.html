@@ -3,27 +3,48 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="initial-scale=1, width=device-width">
+
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1"
+        >
+
+        <meta
+            name="description"
+            content="InternTrack internship discovery and application tracker"
+        >
 
         <link
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
             rel="stylesheet"
         >
 
+        <link
+            href="{{ url_for('static', filename='styles.css') }}"
+            rel="stylesheet"
+        >
+
         <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js">
-        </script>
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            defer
+        ></script>
 
-        <link href="/static/styles.css" rel="stylesheet">
-
-        <title>InternTrack: {% block title %}{% endblock %}</title>
+        <title>
+            InternTrack — {% block title %}{% endblock %}
+        </title>
     </head>
 
     <body>
-        <nav class="bg-light border navbar navbar-expand-md navbar-light">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="{{ url_for('index') }}">
-                    InternTrack
+        <nav
+            class="navbar navbar-expand-md navbar-light sticky-top"
+            aria-label="Main navigation"
+        >
+            <div class="container">
+                <a
+                    class="navbar-brand"
+                    href="{{ url_for('index') }}"
+                >
+                    Intern<span class="blue">Track</span>
                 </a>
 
                 <button
@@ -38,12 +59,18 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse" id="navbar">
+                <div
+                    class="collapse navbar-collapse"
+                    id="navbar"
+                >
                     {% if session.get("user_id") %}
-                        <ul class="navbar-nav me-auto mt-2">
+                        <ul class="navbar-nav me-auto ms-md-4 mt-3 mt-md-0">
                             <li class="nav-item">
                                 <a
-                                    class="nav-link"
+                                    class="nav-link
+                                    {% if request.endpoint == 'index' %}
+                                        active
+                                    {% endif %}"
                                     href="{{ url_for('index') }}"
                                 >
                                     Dashboard
@@ -52,7 +79,10 @@
 
                             <li class="nav-item">
                                 <a
-                                    class="nav-link"
+                                    class="nav-link
+                                    {% if request.endpoint == 'discover' %}
+                                        active
+                                    {% endif %}"
                                     href="{{ url_for('discover') }}"
                                 >
                                     Discover
@@ -61,7 +91,10 @@
 
                             <li class="nav-item">
                                 <a
-                                    class="nav-link"
+                                    class="nav-link
+                                    {% if request.endpoint == 'applications' %}
+                                        active
+                                    {% endif %}"
                                     href="{{ url_for('applications') }}"
                                 >
                                     Applications
@@ -69,7 +102,7 @@
                             </li>
                         </ul>
 
-                        <ul class="navbar-nav ms-auto mt-2">
+                        <ul class="navbar-nav ms-auto mt-3 mt-md-0">
                             <li class="nav-item">
                                 <a
                                     class="nav-link"
@@ -80,10 +113,13 @@
                             </li>
                         </ul>
                     {% else %}
-                        <ul class="navbar-nav ms-auto mt-2">
+                        <ul class="navbar-nav ms-auto mt-3 mt-md-0">
                             <li class="nav-item">
                                 <a
-                                    class="nav-link"
+                                    class="nav-link
+                                    {% if request.endpoint == 'register' %}
+                                        active
+                                    {% endif %}"
                                     href="{{ url_for('register') }}"
                                 >
                                     Register
@@ -92,7 +128,10 @@
 
                             <li class="nav-item">
                                 <a
-                                    class="nav-link"
+                                    class="nav-link
+                                    {% if request.endpoint == 'login' %}
+                                        active
+                                    {% endif %}"
                                     href="{{ url_for('login') }}"
                                 >
                                     Log In
@@ -103,12 +142,17 @@
                 </div>
             </div>
         </nav>
+
+        <!-- Flash messages -->
         <div class="container mt-3">
-            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% with messages =
+                get_flashed_messages(with_categories=true)
+            %}
                 {% if messages %}
                     {% for category, message in messages %}
                         <div
-                            class="alert alert-{{ category }} alert-dismissible fade show"
+                            class="alert alert-{{ category }}
+                                   alert-dismissible fade show"
                             role="alert"
                         >
                             {{ message }}
@@ -124,8 +168,24 @@
                 {% endif %}
             {% endwith %}
         </div>
-        <main class="container py-5">
+
+        <main>
             {% block main %}{% endblock %}
         </main>
+
+        <footer class="border-top py-4">
+            <div
+                class="container d-flex flex-wrap
+                       justify-content-between gap-2"
+            >
+                <span class="text-muted">
+                    InternTrack
+                </span>
+
+                <span class="text-muted">
+                    Internship discovery and application tracking
+                </span>
+            </div>
+        </footer>
     </body>
 </html>

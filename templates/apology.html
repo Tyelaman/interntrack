@@ -1,11 +1,47 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Apology
+    Something Went Wrong
 {% endblock %}
 
 {% block main %}
-    <!-- https://memegen.link/ -->
-    <!-- https://knowyourmeme.com/memes/grumpy-cat -->
-    <img alt="{{ top }}" class="border img-fluid" src="https://api.memegen.link/images/custom/{{ top | urlencode }}/{{ bottom | urlencode }}.jpg?background=https://i.imgur.com/CsCgN7Ll.png&width=400" title="{{ top }}">
+    <div class="apology-page">
+        <section class="apology-card content-panel">
+            <p class="page-eyebrow">
+                InternTrack Error
+            </p>
+
+            <h1 class="mb-3">
+                {{ top }}
+            </h1>
+
+            <p class="mb-4">
+                {{ bottom }}
+            </p>
+
+            <img
+                alt="{{ top }}"
+                class="apology-image img-fluid"
+                src="https://api.memegen.link/images/custom/{{ top | urlencode }}/{{ bottom | urlencode }}.jpg?background=https://i.imgur.com/CsCgN7Ll.png&width=400"
+                title="{{ top }}"
+            >
+
+            <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+                <button
+                    type="button"
+                    class="btn btn-dark"
+                    onclick="history.back()"
+                >
+                    Go Back
+                </button>
+
+                <a
+                    href="{{ url_for('index') }}"
+                    class="btn btn-outline-primary"
+                >
+                    Dashboard
+                </a>
+            </div>
+        </section>
+    </div>
 {% endblock %}

@@ -5,110 +5,197 @@
 {% endblock %}
 
 {% block main %}
-    <h1 class="mb-4">Dashboard</h1>
+    {% set badge_classes = {
+        "Saved": "bg-secondary",
+        "Applied": "bg-primary",
+        "Online Assessment": "bg-info text-dark",
+        "Interview": "bg-warning text-dark",
+        "Rejected": "bg-danger",
+        "Offer": "bg-success"
+    } %}
 
-    <!-- Application summary cards -->
-    <div class="row">
-        <div class="col-md mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Total Applications</h5>
-                    <p class="display-5 mb-0">{{ total }}</p>
-                </div>
-            </div>
+    <div class="page-header">
+        <div>
+            <p class="page-eyebrow">
+                Overview
+            </p>
+
+            <h1 class="page-title">
+                Dashboard
+            </h1>
+
+            <p class="page-subtitle">
+                See your application progress and quickly return to
+                recently saved opportunities.
+            </p>
         </div>
-
-        <div class="col-md mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Applied</h5>
-                    <p class="display-5 mb-0">{{ applied }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Interviewing</h5>
-                    <p class="display-5 mb-0">{{ interviewing }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Rejected</h5>
-                    <p class="display-5 mb-0">{{ rejected }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Offers</h5>
-                    <p class="display-5 mb-0">{{ offers }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recently saved applications -->
-    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-        <h2 class="mb-0">Recently Saved</h2>
 
         <a
-            href="{{ url_for('applications') }}"
-            class="btn btn-outline-primary"
+            href="{{ url_for('discover') }}"
+            class="btn btn-primary"
         >
-            View All Applications
+            Discover Internships
         </a>
     </div>
 
-    {% if recent_applications %}
-        {% for application in recent_applications %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h5 class="card-title">
-                                {{ application["title"] }}
-                            </h5>
+    <!-- Application summary -->
+    <section
+        class="dashboard-grid"
+        aria-label="Application statistics"
+    >
+        <div class="dashboard-stat">
+            <p class="dashboard-stat-label">
+                Total Applications
+            </p>
 
-                            <p class="mb-1">
-                                <strong>{{ application["company"] }}</strong>
-                            </p>
+            <p class="dashboard-stat-value">
+                {{ total }}
+            </p>
+        </div>
+
+        <div class="dashboard-stat">
+            <p class="dashboard-stat-label">
+                Applied
+            </p>
+
+            <p class="dashboard-stat-value">
+                {{ applied }}
+            </p>
+        </div>
+
+        <div class="dashboard-stat">
+            <p class="dashboard-stat-label">
+                Interviewing
+            </p>
+
+            <p class="dashboard-stat-value">
+                {{ interviewing }}
+            </p>
+        </div>
+
+        <div class="dashboard-stat">
+            <p class="dashboard-stat-label">
+                Rejected
+            </p>
+
+            <p class="dashboard-stat-value">
+                {{ rejected }}
+            </p>
+        </div>
+
+        <div class="dashboard-stat">
+            <p class="dashboard-stat-label">
+                Offers
+            </p>
+
+            <p class="dashboard-stat-value">
+                {{ offers }}
+            </p>
+        </div>
+    </section>
+
+    <!-- Recently saved applications -->
+    <section>
+        <div class="discover-results-header">
+            <div>
+                <h2 class="h4 mb-1">
+                    Recently Saved
+                </h2>
+
+                <p class="mb-0">
+                    Your three most recently tracked applications.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('applications') }}"
+                class="btn btn-outline-primary"
+            >
+                View All Applications
+            </a>
+        </div>
+
+        {% if recent_applications %}
+            <div class="applications-list">
+                {% for application in recent_applications %}
+                    <article class="application-card">
+                        <div class="application-card-header">
+                            <div>
+                                <p class="application-company">
+                                    {{ application["company"] }}
+                                </p>
+
+                                <h3 class="application-title">
+                                    {{ application["title"] }}
+                                </h3>
+                            </div>
+
+                            <span
+                                class="badge {{
+                                    badge_classes.get(
+                                        application["status"],
+                                        "bg-secondary"
+                                    )
+                                }}"
+                            >
+                                {{ application["status"] }}
+                            </span>
                         </div>
 
-                        <span class="badge bg-secondary">
-                            {{ application["status"] }}
-                        </span>
-                    </div>
+                        <div class="application-meta-grid">
+                            <div class="application-meta-item">
+                                <span class="application-meta-label">
+                                    Status
+                                </span>
 
-                    <p class="text-muted mb-3">
-                        Saved: {{ application["saved_at"] | format_date }}
-                    </p>
+                                <strong>
+                                    {{ application["status"] }}
+                                </strong>
+                            </div>
 
-                    {% if application["apply_url"] %}
-                        <a
-                            href="{{ application['apply_url'] }}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="btn btn-primary"
-                        >
-                            View Posting
-                        </a>
-                    {% endif %}
-                </div>
+                            <div class="application-meta-item">
+                                <span class="application-meta-label">
+                                    Saved
+                                </span>
+
+                                <strong>
+                                    {{
+                                        application["saved_at"]
+                                        | format_date
+                                    }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="application-actions">
+                            <a
+                                href="{{ url_for('applications') }}"
+                                class="btn btn-outline-secondary"
+                            >
+                                Manage Application
+                            </a>
+
+                            {% if application["apply_url"] %}
+                                <a
+                                    href="{{ application['apply_url'] }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="btn btn-primary"
+                                >
+                                    View Posting
+                                </a>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
             </div>
-        {% endfor %}
-    {% else %}
-        <div class="card">
-            <div class="card-body text-center">
-                <p class="mb-3">
-                    You have not saved any internships yet.
+        {% else %}
+            <div class="empty-state">
+                <h2>No applications yet</h2>
+
+                <p>
+                    Search available internships and save positions to
+                    begin tracking your progress.
                 </p>
 
                 <a
@@ -118,6 +205,6 @@
                     Discover Internships
                 </a>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
+    </section>
 {% endblock %}

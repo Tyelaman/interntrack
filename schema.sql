@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS applications (
             )
         ),
 
-    notes TEXT,
+    notes TEXT NOT NULL DEFAULT '',
 
     saved_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
