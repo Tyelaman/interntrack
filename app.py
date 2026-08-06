@@ -115,18 +115,11 @@ def update_status():
 @app.route("/update-details", methods=["POST"])
 @login_required
 def update_details():
-    """Update sponsorship information and personal notes."""
+    """Update personal notes for a saved application."""
 
     application_id = request.form.get("application_id")
-    sponsorship = request.form.get("sponsorship")
     notes = request.form.get("notes", "").strip()
     return_status = request.form.get("return_status", "All")
-
-    allowed_sponsorship_values = [
-        "Yes",
-        "No",
-        "Unknown",
-    ]
 
     allowed_status_filters = [
         "All",
@@ -141,9 +134,6 @@ def update_details():
     if not application_id:
         return apology("missing application ID", 400)
 
-    if sponsorship not in allowed_sponsorship_values:
-        return apology("invalid sponsorship value", 400)
-
     if len(notes) > 1000:
         return apology(
             "notes must be 1000 characters or fewer",
@@ -156,16 +146,15 @@ def update_details():
     db.execute(
         """
         UPDATE applications
-        SET sponsorship = ?, notes = ?
+        SET notes = ?
         WHERE id = ? AND user_id = ?
         """,
-        sponsorship,
         notes,
         application_id,
         session["user_id"],
     )
 
-    flash("Application details updated.", "success")
+    flash("Application notes updated.", "success")
 
     return redirect(
         url_for("applications", status=return_status)

@@ -32,14 +32,21 @@ CREATE TABLE IF NOT EXISTS applications (
             )
         ),
 
-    sponsorship TEXT NOT NULL DEFAULT 'Unknown'
-        CHECK (
-            sponsorship IN (
-                'Yes',
-                'No',
-                'Unknown'
-            )
-        ),
+    status TEXT NOT NULL DEFAULT 'Saved'
+    CHECK (
+        status IN (
+            'Saved',
+            'Applied',
+            'Online Assessment',
+            'Interview',
+            'Rejected',
+            'Offer'
+        )
+    ),
+
+notes TEXT NOT NULL DEFAULT '',
+
+saved_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     notes TEXT NOT NULL DEFAULT '',
 

@@ -154,8 +154,7 @@ The `applications` table stores:
 - Application URL
 - Original posting date
 - Application status
-- Sponsorship value reserved for future expansion
-- Notes reserved for future expansion
+- Personal notes
 - Time the listing was saved
 
 The combination of `user_id`, `source`, and `external_id` is unique. This prevents duplicate saves for one user while allowing separate users to track the same listing.
@@ -230,7 +229,6 @@ The application uses parameterized SQL queries with `?` placeholders instead of 
 Possible future additions include:
 
 - Notes for each application
-- Sponsorship tracking
 - Search pagination
 - Better posting-date formatting
 - More detailed dashboard statistics
