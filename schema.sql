@@ -32,21 +32,7 @@ CREATE TABLE IF NOT EXISTS applications (
             )
         ),
 
-    status TEXT NOT NULL DEFAULT 'Saved'
-    CHECK (
-        status IN (
-            'Saved',
-            'Applied',
-            'Online Assessment',
-            'Interview',
-            'Rejected',
-            'Offer'
-        )
-    ),
-
-notes TEXT NOT NULL DEFAULT '',
-
-saved_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    application_deadline DATE,
 
     notes TEXT NOT NULL DEFAULT '',
 
@@ -61,3 +47,6 @@ saved_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
 CREATE INDEX IF NOT EXISTS idx_applications_user_status
 ON applications(user_id, status);
+
+CREATE INDEX IF NOT EXISTS idx_applications_user_deadline
+ON applications(user_id, application_deadline);

@@ -226,16 +226,28 @@
                                 Application Deadline
                             </span>
 
-                            <strong>
-                                {% if application.get("application_deadline") %}
+                            {% if application["application_deadline"] %}
+                                <strong>
                                     {{
                                         application["application_deadline"]
                                         | format_date
                                     }}
-                                {% else %}
-                                    Unknown
-                                {% endif %}
-                            </strong>
+                                </strong>
+
+                                <span
+                                    class="deadline-label {{
+                                        application['deadline_class']
+                                    }}"
+                                >
+                                    {{ application["deadline_label"] }}
+                                </span>
+                            {% else %}
+                                <strong>Unknown</strong>
+
+                                <span class="deadline-label deadline-unknown">
+                                    No deadline entered
+                                </span>
+                            {% endif %}
                         </div>
 
                         <div class="application-meta-item">
@@ -362,7 +374,80 @@
                         </form>
                     </div>
 
-                    <!-- Main actions -->
+                    <!-- Deadline and notes form -->
+                    <form
+                        action="{{ url_for('update_details') }}"
+                        method="post"
+                        class="application-details-form"
+                        data-preserve-scroll
+                    >
+                        <input
+                            type="hidden"
+                            name="application_id"
+                            value="{{ application['id'] }}"
+                        >
+
+                        <input
+                            type="hidden"
+                            name="return_status"
+                            value="{{ selected_status }}"
+                        >
+
+                        <div class="application-details-grid">
+                            <div>
+                                <label
+                                    for="deadline-{{ application['id'] }}"
+                                    class="form-label"
+                                >
+                                    Application Deadline
+                                </label>
+
+                                <input
+                                    id="deadline-{{ application['id'] }}"
+                                    name="application_deadline"
+                                    type="date"
+                                    class="form-control"
+                                    value="{{ application['deadline_input_value'] }}"
+                                >
+
+                                <div class="form-text">
+                                    Leave this empty when the deadline is
+                                    unknown.
+                                </div>
+                            </div>
+
+                            <div>
+                                <label
+                                    for="notes-{{ application['id'] }}"
+                                    class="form-label"
+                                >
+                                    Personal Notes
+                                </label>
+
+                                <textarea
+                                    id="notes-{{ application['id'] }}"
+                                    name="notes"
+                                    class="form-control"
+                                    maxlength="1000"
+                                    rows="3"
+                                    placeholder="Recruiter contact, assessment details, interview preparation..."
+                                >{{ application["notes"] or "" }}</textarea>
+
+                                <div class="form-text">
+                                    Maximum 1,000 characters.
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-outline-primary mt-3"
+                        >
+                            Save Details
+                        </button>
+                    </form>
+
+                                        <!-- Main actions -->
                     <div class="application-actions">
                         <div>
                             {% if application["apply_url"] %}

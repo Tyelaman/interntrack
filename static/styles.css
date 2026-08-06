@@ -365,6 +365,7 @@ textarea.form-control {
     color: #475569;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
+    line-clamp: 4;
 }
 
 .job-meta {
@@ -630,5 +631,82 @@ textarea.form-control {
     .filter-panel,
     .content-panel {
         padding: 1.15rem;
+    }
+}
+
+/* Application deadlines and notes */
+
+.application-details-form {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.application-details-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(220px, 0.7fr)
+        minmax(300px, 1.3fr);
+    gap: 1rem;
+}
+
+.deadline-label {
+    display: inline-block;
+    margin-top: 0.4rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.deadline-unknown {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.deadline-upcoming {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.deadline-today {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.deadline-passed {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.deadline-list {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.deadline-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.9rem;
+    background: var(--surface);
+    box-shadow: var(--shadow-small);
+}
+
+.deadline-empty-state {
+    padding: 2.5rem 1.5rem;
+}
+
+@media (max-width: 700px) {
+    .application-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .deadline-card {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }

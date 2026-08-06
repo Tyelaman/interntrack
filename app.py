@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 import math
 import os
 
@@ -66,6 +66,57 @@ def format_date(value):
         f"{parsed_date.year}"
     )
 
+def add_deadline_metadata(applications):
+    """Add readable deadline information to application records."""
+
+    today = date.today()
+
+    for application in applications:
+        deadline_value = application.get("application_deadline")
+
+        application["deadline_input_value"] = ""
+        application["deadline_label"] = "Unknown"
+        application["deadline_class"] = "deadline-unknown"
+
+        if not deadline_value:
+            continue
+
+        try:
+            if isinstance(deadline_value, datetime):
+                deadline_date = deadline_value.date()
+            elif isinstance(deadline_value, date):
+                deadline_date = deadline_value
+            else:
+                deadline_date = datetime.strptime(
+                    str(deadline_value),
+                    "%Y-%m-%d",
+                ).date()
+        except ValueError:
+            continue
+
+        application["deadline_input_value"] = (
+            deadline_date.isoformat()
+        )
+
+        days_remaining = (deadline_date - today).days
+
+        if days_remaining < 0:
+            application["deadline_label"] = "Deadline passed"
+            application["deadline_class"] = "deadline-passed"
+        elif days_remaining == 0:
+            application["deadline_label"] = "Due today"
+            application["deadline_class"] = "deadline-today"
+        elif days_remaining == 1:
+            application["deadline_label"] = "Due tomorrow"
+            application["deadline_class"] = "deadline-today"
+        else:
+            application["deadline_label"] = (
+                f"Due in {days_remaining} days"
+            )
+            application["deadline_class"] = "deadline-upcoming"
+
+    return applications
+
 
 @app.route("/update-status", methods=["POST"])
 @login_required
@@ -115,9 +166,13 @@ def update_status():
 @app.route("/update-details", methods=["POST"])
 @login_required
 def update_details():
-    """Update personal notes for a saved application."""
+    """Update a saved application's deadline and personal notes."""
 
     application_id = request.form.get("application_id")
+    deadline_input = request.form.get(
+        "application_deadline",
+        "",
+    ).strip()
     notes = request.form.get("notes", "").strip()
     return_status = request.form.get("return_status", "All")
 
@@ -140,21 +195,36 @@ def update_details():
             400,
         )
 
+    application_deadline = None
+
+    if deadline_input:
+        try:
+            application_deadline = datetime.strptime(
+                deadline_input,
+                "%Y-%m-%d",
+            ).date().isoformat()
+        except ValueError:
+            return apology(
+                "deadline must be a valid date",
+                400,
+            )
+
     if return_status not in allowed_status_filters:
         return_status = "All"
 
     db.execute(
         """
         UPDATE applications
-        SET notes = ?
+        SET application_deadline = ?, notes = ?
         WHERE id = ? AND user_id = ?
         """,
+        application_deadline,
         notes,
         application_id,
         session["user_id"],
     )
 
-    flash("Application notes updated.", "success")
+    flash("Application details updated.", "success")
 
     return redirect(
         url_for("applications", status=return_status)
@@ -298,6 +368,8 @@ def applications():
             selected_status,
         )
 
+    saved_jobs = add_deadline_metadata(saved_jobs)
+
     return render_template(
         "applications.html",
         applications=saved_jobs,
@@ -402,6 +474,29 @@ def index():
         """,
         user_id,
     )
+    upcoming_deadlines = db.execute(
+        """
+        SELECT
+            id,
+            title,
+            company,
+            status,
+            application_deadline
+        FROM applications
+        WHERE
+            user_id = ?
+            AND application_deadline IS NOT NULL
+            AND application_deadline >= ?
+        ORDER BY application_deadline ASC
+        LIMIT 5
+        """,
+        user_id,
+        date.today().isoformat(),
+    )
+
+    upcoming_deadlines = add_deadline_metadata(
+        upcoming_deadlines
+    )
 
     return render_template(
         "index.html",
@@ -411,6 +506,7 @@ def index():
         rejected=status_counts["Rejected"],
         offers=status_counts["Offer"],
         recent_applications=recent_applications,
+        upcoming_deadlines=upcoming_deadlines,
     )
 
 

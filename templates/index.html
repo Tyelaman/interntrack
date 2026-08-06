@@ -94,6 +94,69 @@
         </div>
     </section>
 
+    <!-- Upcoming deadlines -->
+    <section class="mb-5">
+        <div class="discover-results-header">
+            <div>
+                <h2 class="h4 mb-1">
+                    Upcoming Deadlines
+                </h2>
+
+                <p class="mb-0">
+                    Your nearest known application deadlines.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('applications') }}"
+                class="btn btn-outline-primary"
+            >
+                Manage Deadlines
+            </a>
+        </div>
+
+        {% if upcoming_deadlines %}
+            <div class="deadline-list">
+                {% for application in upcoming_deadlines %}
+                    <article class="deadline-card">
+                        <div>
+                            <p class="application-company">
+                                {{ application["company"] }}
+                            </p>
+
+                            <h3 class="h5 mb-1">
+                                {{ application["title"] }}
+                            </h3>
+
+                            <p class="mb-0 text-muted">
+                                {{
+                                    application["application_deadline"]
+                                    | format_date
+                                }}
+                            </p>
+                        </div>
+
+                        <span
+                            class="deadline-label {{
+                                application['deadline_class']
+                            }}"
+                        >
+                            {{ application["deadline_label"] }}
+                        </span>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state deadline-empty-state">
+                <h2>No upcoming deadlines</h2>
+
+                <p>
+                    Add a deadline to a saved application and it will
+                    appear here.
+                </p>
+            </div>
+        {% endif %}
+    </section>
     <!-- Recently saved applications -->
     <section>
         <div class="discover-results-header">

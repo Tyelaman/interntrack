@@ -36,10 +36,10 @@ A database uniqueness constraint prevents the same user from saving the same Adz
 
 Saved internships appear on the Applications page. Users can:
 
-- View the position title, company, location, status, saved date, and original posting
-- Change the status of an application
-- Delete an application
-- Filter applications by status
+- Add, update, or clear an application deadline
+- Store personal notes for each application
+- See whether a deadline is upcoming, due today, or passed
+- View the nearest upcoming deadlines on the dashboard
 
 Supported statuses are:
 
@@ -54,7 +54,8 @@ All update and delete queries verify both the application ID and the current use
 
 ### Dashboard
 
-The dashboard gives the user a quick overview of their internship search. It displays:
+The dashboard also displays up to five upcoming application
+deadlines, ordered from nearest to farthest.
 
 - Total saved applications
 - Number marked Applied
@@ -88,6 +89,7 @@ interntrack/
 ├── app.py
 ├── jobs.py
 ├── helpers.py
+├── migrate_deadline.py
 ├── requirements.txt
 ├── schema.sql
 ├── .env
@@ -115,6 +117,12 @@ interntrack/
 ### `helpers.py`
 
 `helpers.py` contains shared helper functions, including the authentication decorator used to protect routes and the apology function used to display errors.
+
+### `migrate_deadline.py`
+
+`migrate_deadline.py` safely adds the nullable
+`application_deadline` column to an existing SQLite database without
+deleting current users or applications. It can be run multiple time
 
 ### Templates
 
@@ -154,8 +162,9 @@ The `applications` table stores:
 - Application URL
 - Original posting date
 - Application status
-- Personal notes
 - Time the listing was saved
+- Application deadline, stored as a nullable date
+- Personal notes
 
 The combination of `user_id`, `source`, and `external_id` is unique. This prevents duplicate saves for one user while allowing separate users to track the same listing.
 
