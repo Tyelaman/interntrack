@@ -16,7 +16,9 @@ def search_jobs(keyword, location, page_number=1):
 
     # Check that both credentials exist
     if not app_id or not app_key:
-        raise ValueError("Missing Adzuna credentials in .env file")
+        raise JobSearchError(
+            "Internship search is not configured right now."
+        )
 
     # Build the Adzuna endpoint URL
     country_code = "us"
@@ -52,9 +54,14 @@ def search_jobs(keyword, location, page_number=1):
             else None
         )
 
-        if status_code == 429:
+        if status_code in [401, 403]:
+            message = (
+                "Internship search is temporarily unavailable because "
+                "the service could not authorize the request."
+            )
+        elif status_code == 429:
             message = "Too many searches were made. Please wait and try again."
-        elif status_code in [500, 502, 503, 504]:
+        elif status_code is not None and 500 <= status_code < 600:
             message = (
                 "The internship search service is temporarily unavailable. "
                 "Please try again shortly."
@@ -80,8 +87,12 @@ def search_jobs(keyword, location, page_number=1):
     # Normalizing the results to ensure consistent structure
     normalized_jobs = []
     for raw_job in data.get("results", []):
+        external_id = raw_job.get("id")
+        if external_id is None or not str(external_id).strip():
+            continue
+
         normalized_job = {
-            "external_id": raw_job.get("id"),
+            "external_id": str(external_id).strip(),
             "title": raw_job.get("title", "Untitled position"),
 
             # Nested company dictionary
@@ -97,7 +108,7 @@ def search_jobs(keyword, location, page_number=1):
             ),
 
             "description": raw_job.get("description", "No description provided"),
-            "apply_url": raw_job.get("redirect_url", "None"),
+            "apply_url": raw_job.get("redirect_url") or None,
             "posted_at": raw_job.get("created", "Date not available")
         }
         normalized_jobs.append(normalized_job)
