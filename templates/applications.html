@@ -284,6 +284,8 @@
                             class="d-flex flex-wrap align-items-end gap-2"
                             data-preserve-scroll
                         >
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                             <input
                                 type="hidden"
                                 name="application_id"
@@ -381,6 +383,8 @@
                         class="application-details-form"
                         data-preserve-scroll
                     >
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                         <input
                             type="hidden"
                             name="application_id"
@@ -475,6 +479,8 @@
                             method="post"
                             data-preserve-scroll
                         >
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                             <input
                                 type="hidden"
                                 name="application_id"

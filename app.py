@@ -1,6 +1,7 @@
 from datetime import date, datetime
 import math
 import os
+from urllib.parse import urlparse
 
 from cs50 import SQL
 from dotenv import load_dotenv
@@ -14,6 +15,7 @@ from flask import (
     url_for,
 )
 from flask_session import Session
+from flask_wtf.csrf import CSRFError, CSRFProtect
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from helpers import apology, login_required
@@ -36,7 +38,10 @@ if not app.config["SECRET_KEY"]:
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = "session_files"
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 Session(app)
+csrf = CSRFProtect(app)
 
 # Configure CS50 Library to use SQLite
 db = SQL("sqlite:///interntrack.db")
@@ -276,18 +281,46 @@ def delete_application():
 def save():
     """Save an internship to the user's tracker."""
 
-    external_id = request.form.get("external_id")
-    title = request.form.get("title")
-    company = request.form.get("company")
-    location = request.form.get("location")
-    description = request.form.get("description")
-    apply_url = request.form.get("apply_url")
-    posted_at = request.form.get("posted_at")
+    external_id = request.form.get("external_id", "").strip()
+    title = request.form.get("title", "").strip()
+    company = request.form.get("company", "").strip()
+    location = request.form.get("location", "").strip() or None
+    description = request.form.get("description", "").strip() or None
+    apply_url = request.form.get("apply_url", "").strip() or None
+    posted_at = request.form.get("posted_at", "").strip() or None
 
     user_id = session["user_id"]
 
     if not external_id or not title or not company:
         return apology("missing required job information", 400)
+
+    maximum_lengths = {
+        "external ID": (external_id, 255),
+        "title": (title, 500),
+        "company": (company, 255),
+        "location": (location, 500),
+        "description": (description, 20000),
+        "apply URL": (apply_url, 2048),
+        "posted date": (posted_at, 100),
+    }
+
+    for field_name, (value, maximum) in maximum_lengths.items():
+        if value is not None and len(value) > maximum:
+            return apology(
+                f"{field_name} must be {maximum} characters or fewer",
+                400,
+            )
+
+    if apply_url:
+        parsed_apply_url = urlparse(apply_url)
+        if (
+            parsed_apply_url.scheme.lower() not in {"http", "https"}
+            or not parsed_apply_url.netloc
+        ):
+            return apology(
+                "job posting URL must use HTTP or HTTPS",
+                400,
+            )
 
     try:
         db.execute(
@@ -530,7 +563,7 @@ def login():
     session.clear()
 
     if request.method == "POST":
-        username = request.form.get("username")
+        username = request.form.get("username", "").strip()
         password = request.form.get("password")
 
         if not username:
@@ -578,15 +611,27 @@ def register():
     """Register a new user."""
 
     if request.method == "POST":
-        username = request.form.get("username")
+        username = request.form.get("username", "").strip()
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
 
         if not username:
             return apology("must provide username", 400)
 
+        if not 3 <= len(username) <= 50:
+            return apology(
+                "username must be between 3 and 50 characters",
+                400,
+            )
+
         if not password:
             return apology("must provide password", 400)
+
+        if len(password) < 8:
+            return apology(
+                "password must be at least 8 characters",
+                400,
+            )
 
         if not confirmation:
             return apology(
@@ -616,3 +661,27 @@ def register():
         return redirect(url_for("login"))
 
     return render_template("register.html")
+
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(error):
+    """Show a friendly response when CSRF validation fails."""
+
+    return apology(
+        "your form expired or could not be verified; please try again",
+        400,
+    )
+
+
+@app.errorhandler(404)
+def not_found(error):
+    """Show a friendly response for unknown pages."""
+
+    return apology("page not found", 404)
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    """Show a friendly response for unexpected server errors."""
+
+    return apology("something went wrong; please try again later", 500)
