@@ -37,14 +37,17 @@ if not app.config["SECRET_KEY"]:
 # Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-app.config["SESSION_FILE_DIR"] = "session_files"
+app.config["SESSION_FILE_DIR"] = os.getenv(
+    "SESSION_FILE_DIR",
+    "session_files",
+)
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 Session(app)
 csrf = CSRFProtect(app)
 
 # Configure CS50 Library to use SQLite
-db = SQL("sqlite:///interntrack.db")
+db = SQL(os.getenv("DATABASE_URL", "sqlite:///interntrack.db"))
 db.execute("PRAGMA foreign_keys = ON")
 
 
@@ -59,17 +62,12 @@ def format_date(value):
         parsed_date = value
     else:
         try:
-            parsed_date = datetime.fromisoformat(
-                str(value).replace("Z", "+00:00")
-            )
+            parsed_date = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
         except ValueError:
             return str(value)
 
-    return (
-        f"{parsed_date.strftime('%b')} "
-        f"{parsed_date.day}, "
-        f"{parsed_date.year}"
-    )
+    return f"{parsed_date.strftime('%b')} {parsed_date.day}, {parsed_date.year}"
+
 
 def add_deadline_metadata(applications):
     """Add readable deadline information to application records."""
@@ -99,9 +97,7 @@ def add_deadline_metadata(applications):
         except ValueError:
             continue
 
-        application["deadline_input_value"] = (
-            deadline_date.isoformat()
-        )
+        application["deadline_input_value"] = deadline_date.isoformat()
 
         days_remaining = (deadline_date - today).days
 
@@ -115,9 +111,7 @@ def add_deadline_metadata(applications):
             application["deadline_label"] = "Due tomorrow"
             application["deadline_class"] = "deadline-today"
         else:
-            application["deadline_label"] = (
-                f"Due in {days_remaining} days"
-            )
+            application["deadline_label"] = f"Due in {days_remaining} days"
             application["deadline_class"] = "deadline-upcoming"
 
     return applications
@@ -164,9 +158,8 @@ def update_status():
 
     flash("Application status updated.", "success")
 
-    return redirect(
-        url_for("applications", status=return_status)
-    )
+    return redirect(url_for("applications", status=return_status))
+
 
 @app.route("/update-details", methods=["POST"])
 @login_required
@@ -204,10 +197,14 @@ def update_details():
 
     if deadline_input:
         try:
-            application_deadline = datetime.strptime(
-                deadline_input,
-                "%Y-%m-%d",
-            ).date().isoformat()
+            application_deadline = (
+                datetime.strptime(
+                    deadline_input,
+                    "%Y-%m-%d",
+                )
+                .date()
+                .isoformat()
+            )
         except ValueError:
             return apology(
                 "deadline must be a valid date",
@@ -231,9 +228,8 @@ def update_details():
 
     flash("Application details updated.", "success")
 
-    return redirect(
-        url_for("applications", status=return_status)
-    )
+    return redirect(url_for("applications", status=return_status))
+
 
 @app.route("/delete-application", methods=["POST"])
 @login_required
@@ -271,9 +267,7 @@ def delete_application():
 
     flash("Application deleted.", "success")
 
-    return redirect(
-        url_for("applications", status=return_status)
-    )
+    return redirect(url_for("applications", status=return_status))
 
 
 @app.route("/save", methods=["POST"])
@@ -438,9 +432,7 @@ def discover():
                 page,
             )
 
-            total_pages = math.ceil(
-                total_results / results_per_page
-            )
+            total_pages = math.ceil(total_results / results_per_page)
 
         except JobSearchError as error:
             error_message = str(error)
@@ -527,9 +519,7 @@ def index():
         date.today().isoformat(),
     )
 
-    upcoming_deadlines = add_deadline_metadata(
-        upcoming_deadlines
-    )
+    upcoming_deadlines = add_deadline_metadata(upcoming_deadlines)
 
     return render_template(
         "index.html",
@@ -547,9 +537,7 @@ def index():
 def after_request(response):
     """Ensure responses are not cached."""
 
-    response.headers["Cache-Control"] = (
-        "no-cache, no-store, must-revalidate"
-    )
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
 
@@ -581,10 +569,7 @@ def login():
             username,
         )
 
-        if (
-            len(rows) != 1
-            or not check_password_hash(rows[0]["hash"], password)
-        ):
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
             return apology(
                 "invalid username and/or password",
                 403,
