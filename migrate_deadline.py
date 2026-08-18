@@ -10,10 +10,7 @@ def main():
 
     with sqlite3.connect(DATABASE_PATH) as connection:
         columns = {
-            row[1]
-            for row in connection.execute(
-                "PRAGMA table_info(applications)"
-            )
+            row[1] for row in connection.execute("PRAGMA table_info(applications)")
         }
 
         if "application_deadline" in columns:

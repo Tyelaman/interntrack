@@ -2,6 +2,7 @@
 .venv/
 .vscode/
 __pycache__/
+.pytest_cache/
 *.pyc
 session_files/
 flask_session/

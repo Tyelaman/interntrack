@@ -3,8 +3,10 @@ import os
 import requests
 from dotenv import load_dotenv
 
+
 class JobSearchError(Exception):
     """Raised when the job search service cannot complete a request."""
+
 
 load_dotenv()
 
@@ -16,9 +18,7 @@ def search_jobs(keyword, location, page_number=1):
 
     # Check that both credentials exist
     if not app_id or not app_key:
-        raise JobSearchError(
-            "Internship search is not configured right now."
-        )
+        raise JobSearchError("Internship search is not configured right now.")
 
     # Build the Adzuna endpoint URL
     country_code = "us"
@@ -48,11 +48,7 @@ def search_jobs(keyword, location, page_number=1):
             "Could not connect to the internship search service."
         ) from error
     except requests.HTTPError as error:
-        status_code = (
-            error.response.status_code
-            if error.response is not None
-            else None
-        )
+        status_code = error.response.status_code if error.response is not None else None
 
         if status_code in [401, 403]:
             message = (
@@ -94,22 +90,17 @@ def search_jobs(keyword, location, page_number=1):
         normalized_job = {
             "external_id": str(external_id).strip(),
             "title": raw_job.get("title", "Untitled position"),
-
             # Nested company dictionary
             "company": raw_job.get("company", {}).get(
-                "display_name",
-                "Unknown company"
+                "display_name", "Unknown company"
             ),
-
             # Nested location dictionary
             "location": raw_job.get("location", {}).get(
-                "display_name",
-                "Location unavailable"
+                "display_name", "Location unavailable"
             ),
-
             "description": raw_job.get("description", "No description provided"),
             "apply_url": raw_job.get("redirect_url") or None,
-            "posted_at": raw_job.get("created", "Date not available")
+            "posted_at": raw_job.get("created", "Date not available"),
         }
         normalized_jobs.append(normalized_job)
 
