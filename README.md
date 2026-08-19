@@ -2,75 +2,43 @@
 
 InternTrack is a full-stack internship discovery and application tracking web app built with Flask and PostgreSQL.
 
-Users can search for internship opportunities, save jobs, track application progress, add deadlines and notes, and view their application activity from a dashboard.
+Users can search for internships, save opportunities, track application progress, add deadlines and notes, and view their activity from a dashboard.
 
 **Live Demo:** https://interntrack-pearl.vercel.app
 
 ## Features
 
 - User registration and login
-- Secure password hashing and cookie-based sessions
-- Internship search using the Adzuna API
+- Internship search through the Adzuna API
 - Keyword and location-based search
 - Paginated search results
 - Save internship listings
-- Track application status:
-  - Saved
-  - Applied
-  - Online Assessment
-  - Interview
-  - Rejected
-  - Offer
-- Add application deadlines
-- Add personal notes
+- Track application status
+- Add application deadlines and notes
 - Filter applications by status
-- Dashboard with application statistics
-- Upcoming deadline tracking
+- Dashboard with application statistics and upcoming deadlines
 - Duplicate application prevention
 - CSRF protection and server-side validation
-- User-specific authorization for application updates and deletion
-- PostgreSQL production database
-- Automated testing and CI
+- User-specific authorization
+- Automated tests and CI
 
 ## Tech Stack
 
-### Backend
-- Python
-- Flask
-- CS50 SQL
-- SQLAlchemy
-- PostgreSQL
-- SQLite
-
-### Frontend
-- HTML
-- CSS
-- Bootstrap
-- JavaScript
-- Jinja
-
-### APIs & Services
-- Adzuna Jobs API
-- Neon PostgreSQL
-- Vercel
-
-### Testing & Development
-- pytest
-- Ruff
-- Git
-- GitHub
-- GitHub Actions
+**Backend:** Python, Flask, PostgreSQL, SQLite, CS50 SQL, SQLAlchemy  
+**Frontend:** HTML, CSS, Bootstrap, JavaScript, Jinja  
+**Services:** Adzuna API, Neon PostgreSQL, Vercel  
+**Testing & Tools:** pytest, Ruff, Git, GitHub, GitHub Actions
 
 ## Architecture
 
-InternTrack uses different databases depending on the environment:
+InternTrack uses:
 
-- **Local development and automated tests:** SQLite
-- **Production:** PostgreSQL hosted on Neon
+- **SQLite** for local development and automated tests
+- **PostgreSQL on Neon** for production
+- **Vercel** for deployment
+- **Adzuna API** for internship listings
 
-The application reads the database connection from `DATABASE_URL`, allowing the same Flask application to work with both environments.
-
-Internship listings are retrieved from the Adzuna API and normalized before being displayed to users.
+The application reads the database connection from `DATABASE_URL`, allowing the same Flask application to work with both SQLite and PostgreSQL.
 
 ## Project Structure
 
@@ -102,130 +70,160 @@ interntrack/
 ├── ruff.toml
 ├── schema.sql
 └── schema_postgres.sql
+```
 
-Local Setup
-1. Clone the repository
+## Local Setup
+
+### 1. Clone the repository
+
+```bash
 git clone https://github.com/Tyelaman/interntrack.git
 cd interntrack
-2. Create a virtual environment
+```
+
+### 2. Create a virtual environment
+
+```bash
 python -m venv .venv
+```
 
-On Windows PowerShell:
+Windows PowerShell:
 
+```powershell
 .\.venv\Scripts\Activate.ps1
-3. Install dependencies
+```
+
+### 3. Install dependencies
+
+```bash
 python -m pip install -r requirements.txt
+```
 
 For development and testing:
 
+```bash
 python -m pip install -r requirements-dev.txt
-4. Configure environment variables
+```
 
-Create a .env file in the project root:
+### 4. Configure environment variables
 
+Create a `.env` file:
+
+```env
 SECRET_KEY=your_secret_key
 ADZUNA_APP_ID=your_adzuna_app_id
 ADZUNA_APP_KEY=your_adzuna_app_key
+```
 
-DATABASE_URL is optional locally. If it is not provided, InternTrack uses:
-
-sqlite:///interntrack.db
+InternTrack uses SQLite locally by default.
 
 To use PostgreSQL instead:
 
+```env
 DATABASE_URL=your_postgresql_connection_string
-5. Initialize the local SQLite database
+```
+
+### 5. Initialize SQLite
+
+```bash
 python -m sqlite3 interntrack.db
+```
 
-Then run:
+Then:
 
+```sql
 .read schema.sql
 .quit
-6. Start the application
+```
+
+### 6. Run InternTrack
+
+```bash
 python -m flask --app app run --debug
+```
 
 Open:
 
+```text
 http://127.0.0.1:5000
-Testing
+```
 
-Run the automated test suite:
+## Testing
 
+Run the test suite:
+
+```bash
 python -m pytest
+```
 
-Run linting:
+Run Ruff:
 
+```bash
 ruff check .
-
-Check formatting:
-
 ruff format --check .
+```
 
-GitHub Actions automatically runs these checks for pushes and pull requests.
+GitHub Actions automatically runs the test and quality checks on pushes and pull requests.
 
-Security
+## Security
 
-InternTrack includes several security protections:
+InternTrack includes:
 
-Passwords are hashed using Werkzeug
-CSRF protection is enabled with Flask-WTF
-Database queries use parameterized SQL
-Application records are scoped to the authenticated user
-Input lengths and URLs are validated server-side
-Authentication sessions use signed cookies
-Production cookies are HTTPS-only
-API keys and database credentials are stored in environment variables rather than source code
-Database Design
+- Werkzeug password hashing
+- Flask-WTF CSRF protection
+- Parameterized SQL queries
+- User-scoped database operations
+- Server-side input validation
+- Signed cookie-based sessions
+- HTTPS-only session cookies in production
+- Environment variables for secrets and credentials
 
-The application contains two primary tables:
+## Database
 
-users
+InternTrack uses two main tables:
 
-Stores:
+### `users`
 
-User ID
-Unique username
-Password hash
-applications
+Stores user IDs, usernames, and password hashes.
 
-Stores:
+### `applications`
 
-User ID
-External job ID
-Job source
-Title
-Company
-Location
-Description
-Application URL
-Posting date
-Application status
-Application deadline
-Personal notes
-Saved timestamp
+Stores internship information including:
 
-A unique constraint on:
+- Company and title
+- Location and job URL
+- Application status
+- Deadline
+- Notes
+- Posting and saved dates
 
+The combination of:
+
+```text
 (user_id, source, external_id)
+```
 
-prevents the same user from saving the same job more than once.
+is unique, preventing a user from saving the same internship multiple times.
 
-Deployment
+## Deployment
 
-InternTrack is deployed on Vercel with PostgreSQL hosted on Neon.
+InternTrack is deployed on **Vercel** with its production PostgreSQL database hosted on **Neon**.
 
-Production configuration uses environment variables for:
+Production environment variables:
 
+```text
 SECRET_KEY
 ADZUNA_APP_ID
 ADZUNA_APP_KEY
 DATABASE_URL
-Screenshots
+```
 
-Screenshots will be added soon.
+## Screenshots
 
-Acknowledgements
+Screenshots coming soon.
+
+## Acknowledgements
 
 Internship listing data is provided by the Adzuna API.
 
-InternTrack originally began as a CS50x final project and was later expanded with PostgreSQL, automated testing, CI, security improvements, application deadlines, notes, and production deployment.
+InternTrack began as a CS50x final project and was later expanded with PostgreSQL, automated testing, CI, security improvements, application deadlines, notes, and production deployment.
