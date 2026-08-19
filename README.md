@@ -1,250 +1,231 @@
 # InternTrack
 
-## Video URL: https://youtu.be/M6wjNmQahzQ
-## Description
+InternTrack is a full-stack internship discovery and application tracking web app built with Flask and PostgreSQL.
 
-InternTrack is a Flask web application that helps users discover internships and organize the positions they are considering or applying to. The project combines internship search with a personal application tracker so that users do not need to search on one website and manage their progress somewhere else.
+Users can search for internship opportunities, save jobs, track application progress, add deadlines and notes, and view their application activity from a dashboard.
 
-Users can create an account, search for internships by keyword and optional location, save interesting listings, update each application's status, filter their saved applications, and view a dashboard summarizing their progress. Internship listings are retrieved from the Adzuna API and normalized into a consistent structure before being displayed by the application.
-
-InternTrack was created as a CS50x final project. It uses concepts covered throughout the course, including Python, Flask, SQL, authentication, sessions, HTML, CSS, Jinja templates, HTTP requests, external APIs, form validation, and CRUD database operations.
+**Live Demo:** https://interntrack-pearl.vercel.app
 
 ## Features
 
-### User accounts
+- User registration and login
+- Secure password hashing and cookie-based sessions
+- Internship search using the Adzuna API
+- Keyword and location-based search
+- Paginated search results
+- Save internship listings
+- Track application status:
+  - Saved
+  - Applied
+  - Online Assessment
+  - Interview
+  - Rejected
+  - Offer
+- Add application deadlines
+- Add personal notes
+- Filter applications by status
+- Dashboard with application statistics
+- Upcoming deadline tracking
+- Duplicate application prevention
+- CSRF protection and server-side validation
+- User-specific authorization for application updates and deletion
+- PostgreSQL production database
+- Automated testing and CI
 
-Users can register with a unique username and password. Passwords are not stored directly; they are hashed using Werkzeug before being saved. Flask sessions keep users logged in, and protected routes require authentication.
+## Tech Stack
 
-Each saved internship belongs to one specific user. Database queries include the logged-in user's ID so that one user cannot view, update, or delete another user's applications.
-
-### Internship discovery
-
-The Discover page lets users search by:
-
-- Keyword, such as `software engineer intern`
-- Optional location, such as `Boston, MA`
-
-The server sends the search request to the Adzuna API. The API response is normalized in `jobs.py` so every result has predictable fields such as title, company, location, description, application URL, external ID, and posting date.
-
-### Saving internships
-
-Users can save an internship from the Discover page. The application stores the job in SQLite and associates it with the current user's ID.
-
-A database uniqueness constraint prevents the same user from saving the same Adzuna listing more than once. Different users can still save the same listing independently.
-
-### Application tracking
-
-Saved internships appear on the Applications page. Users can:
-
-- Add, update, or clear an application deadline
-- Store personal notes for each application
-- See whether a deadline is upcoming, due today, or passed
-- View the nearest upcoming deadlines on the dashboard
-
-Supported statuses are:
-
-- Saved
-- Applied
-- Online Assessment
-- Interview
-- Rejected
-- Offer
-
-All update and delete queries verify both the application ID and the current user's ID.
-
-### Dashboard
-
-The dashboard also displays up to five upcoming application
-deadlines, ordered from nearest to farthest.
-
-- Total saved applications
-- Number marked Applied
-- Number marked Interview
-- Number marked Rejected
-- Number marked Offer
-- Three most recently saved applications
-
-The dashboard data is calculated from the logged-in user's records in SQLite.
-
-## Technologies
-
+### Backend
 - Python
 - Flask
-- Flask-Session
+- CS50 SQL
+- SQLAlchemy
+- PostgreSQL
 - SQLite
-- CS50 SQL library
+
+### Frontend
 - HTML
 - CSS
 - Bootstrap
+- JavaScript
 - Jinja
-- Requests
-- python-dotenv
-- Werkzeug
-- Adzuna API
 
-## Project structure
+### APIs & Services
+- Adzuna Jobs API
+- Neon PostgreSQL
+- Vercel
+
+### Testing & Development
+- pytest
+- Ruff
+- Git
+- GitHub
+- GitHub Actions
+
+## Architecture
+
+InternTrack uses different databases depending on the environment:
+
+- **Local development and automated tests:** SQLite
+- **Production:** PostgreSQL hosted on Neon
+
+The application reads the database connection from `DATABASE_URL`, allowing the same Flask application to work with both environments.
+
+Internship listings are retrieved from the Adzuna API and normalized before being displayed to users.
+
+## Project Structure
 
 ```text
 interntrack/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── public/
+│   └── styles.css
+├── templates/
+│   ├── apology.html
+│   ├── applications.html
+│   ├── discover.html
+│   ├── index.html
+│   ├── layout.html
+│   ├── login.html
+│   └── register.html
+├── tests/
+│   ├── conftest.py
+│   ├── test_app.py
+│   └── test_jobs.py
 ├── app.py
-├── jobs.py
 ├── helpers.py
+├── jobs.py
 ├── migrate_deadline.py
 ├── requirements.txt
+├── requirements-dev.txt
+├── ruff.toml
 ├── schema.sql
-├── .env
-├── .gitignore
-├── static/
-│   └── styles.css
-└── templates/
-    ├── layout.html
-    ├── index.html
-    ├── discover.html
-    ├── applications.html
-    ├── login.html
-    ├── register.html
-    └── apology.html
-```
+└── schema_postgres.sql
 
-### `app.py`
-
-`app.py` contains the Flask application and its routes. It configures sessions and the SQLite database, handles registration and login, saves jobs, updates statuses, deletes applications, filters applications, and calculates dashboard statistics.
-
-### `jobs.py`
-
-`jobs.py` handles communication with the Adzuna API. It loads API credentials from environment variables, sends search requests, checks the HTTP response, and converts the raw API results into dictionaries with a consistent format for the templates.
-
-### `helpers.py`
-
-`helpers.py` contains shared helper functions, including the authentication decorator used to protect routes and the apology function used to display errors.
-
-### `migrate_deadline.py`
-
-`migrate_deadline.py` safely adds the nullable
-`application_deadline` column to an existing SQLite database without
-deleting current users or applications. It can be run multiple time
-
-### Templates
-
-The files in `templates/` define the user interface:
-
-- `layout.html` contains the shared navigation bar and page structure.
-- `index.html` displays the dashboard.
-- `discover.html` contains the internship search form and search results.
-- `applications.html` displays saved applications, filters, status controls, and delete controls.
-- `login.html` and `register.html` contain the authentication forms.
-- `apology.html` displays validation and application errors.
-
-### `static/styles.css`
-
-This file contains custom styling that supplements Bootstrap.
-
-### `schema.sql`
-
-`schema.sql` defines the `users` and `applications` tables, their constraints, and the application index. The applications table uses a foreign key to connect each saved internship to a user.
-
-## Database design
-
-The `users` table stores:
-
-- User ID
-- Unique username
-- Password hash
-
-The `applications` table stores:
-
-- User ID
-- Source and external job ID
-- Title
-- Company
-- Location
-- Description
-- Application URL
-- Original posting date
-- Application status
-- Time the listing was saved
-- Application deadline, stored as a nullable date
-- Personal notes
-
-The combination of `user_id`, `source`, and `external_id` is unique. This prevents duplicate saves for one user while allowing separate users to track the same listing.
-
-## Installation
-
-1. Clone the repository:
-
-```bash
+Local Setup
+1. Clone the repository
 git clone https://github.com/Tyelaman/interntrack.git
 cd interntrack
-```
-
-2. Create a virtual environment:
-
-```bash
+2. Create a virtual environment
 python -m venv .venv
-```
 
-3. Activate it on Windows PowerShell:
+On Windows PowerShell:
 
-```powershell
 .\.venv\Scripts\Activate.ps1
-```
-
-4. Install the dependencies:
-
-```bash
+3. Install dependencies
 python -m pip install -r requirements.txt
-```
 
-5. Create a `.env` file in the project root:
+For development and testing:
 
-```env
+python -m pip install -r requirements-dev.txt
+4. Configure environment variables
+
+Create a .env file in the project root:
+
+SECRET_KEY=your_secret_key
 ADZUNA_APP_ID=your_adzuna_app_id
 ADZUNA_APP_KEY=your_adzuna_app_key
-```
 
-6. Initialize the database:
+DATABASE_URL is optional locally. If it is not provided, InternTrack uses:
 
-```bash
+sqlite:///interntrack.db
+
+To use PostgreSQL instead:
+
+DATABASE_URL=your_postgresql_connection_string
+5. Initialize the local SQLite database
 python -m sqlite3 interntrack.db
-```
 
 Then run:
 
-```sql
 .read schema.sql
 .quit
-```
+6. Start the application
+python -m flask --app app run --debug
 
-7. Start the Flask development server:
+Open:
 
-```bash
-flask run
-```
+http://127.0.0.1:5000
+Testing
 
-8. Open the local address shown in the terminal, usually `http://127.0.0.1:5000`.
+Run the automated test suite:
 
-## Security and design decisions
+python -m pytest
 
-API credentials are stored in `.env` rather than directly in the source code. The `.env` file must never be committed to GitHub.
+Run linting:
 
-Passwords are hashed before storage. Routes that display or modify personal application data require authentication. Update and delete queries include `user_id` checks to prevent users from changing records they do not own.
+ruff check .
 
-Hidden form inputs are used to submit normalized job information from the Discover page, but the user ID is never accepted from the browser. It is always read from the authenticated session.
+Check formatting:
 
-The application uses parameterized SQL queries with `?` placeholders instead of constructing SQL commands from user input.
+ruff format --check .
 
-## Future improvements
+GitHub Actions automatically runs these checks for pushes and pull requests.
 
-Possible future additions include:
+Security
 
-- Notes for each application
-- Search pagination
-- Better posting-date formatting
-- More detailed dashboard statistics
-- Automatic filtering of non-internship roles
-- Improved API error messages
-- Deployment to a public hosting service
+InternTrack includes several security protections:
 
-## Acknowledgements
+Passwords are hashed using Werkzeug
+CSRF protection is enabled with Flask-WTF
+Database queries use parameterized SQL
+Application records are scoped to the authenticated user
+Input lengths and URLs are validated server-side
+Authentication sessions use signed cookies
+Production cookies are HTTPS-only
+API keys and database credentials are stored in environment variables rather than source code
+Database Design
 
-Internship listing data is provided by the Adzuna API. The project was built as a CS50x final project.
+The application contains two primary tables:
+
+users
+
+Stores:
+
+User ID
+Unique username
+Password hash
+applications
+
+Stores:
+
+User ID
+External job ID
+Job source
+Title
+Company
+Location
+Description
+Application URL
+Posting date
+Application status
+Application deadline
+Personal notes
+Saved timestamp
+
+A unique constraint on:
+
+(user_id, source, external_id)
+
+prevents the same user from saving the same job more than once.
+
+Deployment
+
+InternTrack is deployed on Vercel with PostgreSQL hosted on Neon.
+
+Production configuration uses environment variables for:
+
+SECRET_KEY
+ADZUNA_APP_ID
+ADZUNA_APP_KEY
+DATABASE_URL
+Screenshots
+
+Screenshots will be added soon.
+
+Acknowledgements
+
+Internship listing data is provided by the Adzuna API.
+
+InternTrack originally began as a CS50x final project and was later expanded with PostgreSQL, automated testing, CI, security improvements, application deadlines, notes, and production deployment.
