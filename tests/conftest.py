@@ -15,7 +15,6 @@ os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("ADZUNA_APP_ID", "test-app-id")
 os.environ.setdefault("ADZUNA_APP_KEY", "test-app-key")
 os.environ["DATABASE_URL"] = f"sqlite:///{_DATABASE_PATH.as_posix()}"
-os.environ["SESSION_FILE_DIR"] = str(_TEMP_PATH / "sessions")
 
 with sqlite3.connect(_DATABASE_PATH) as connection:
     schema_path = Path(__file__).parents[1] / "schema.sql"
