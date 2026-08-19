@@ -14,7 +14,6 @@ from flask import (
     session,
     url_for,
 )
-from flask_session import Session
 from flask_wtf.csrf import CSRFError, CSRFProtect
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -26,7 +25,11 @@ from jobs import JobSearchError, search_jobs
 load_dotenv()
 
 # Configure application
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder="public",
+    static_url_path="",
+)
 
 # Retrieve secret key from environment variable
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
@@ -34,21 +37,25 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 if not app.config["SECRET_KEY"]:
     raise RuntimeError("Missing SECRET_KEY in .env")
 
-# Configure session to use filesystem
+# Configure secure cookie-based sessions
 app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-app.config["SESSION_FILE_DIR"] = os.getenv(
-    "SESSION_FILE_DIR",
-    "session_files",
-)
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-Session(app)
+app.config["SESSION_COOKIE_SECURE"] = os.getenv("VERCEL") == "1"
+
 csrf = CSRFProtect(app)
 
-# Configure CS50 Library to use SQLite
-db = SQL(os.getenv("DATABASE_URL", "sqlite:///interntrack.db"))
-db.execute("PRAGMA foreign_keys = ON")
+# Configure database
+database_url = os.getenv(
+    "DATABASE_URL",
+    "sqlite:///interntrack.db",
+)
+
+db = SQL(database_url)
+
+# SQLite requires foreign key enforcement to be enabled explicitly
+if database_url.lower().startswith("sqlite:"):
+    db.execute("PRAGMA foreign_keys = ON")
 
 
 @app.template_filter("format_date")
